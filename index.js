@@ -2,12 +2,14 @@
 const sendBtn = document.querySelector('#send')
 const messages = document.querySelector('#messages')
 const messageInput = document.querySelector('#message-input')
+const nameInput = document.querySelector('#name-input')
 
 let ws
 
+
 // Display messages from the websocket
-function showMessage(message) {
-  messages.innerHTML += `<li>${message}</li>` // display the message
+function showMessage({name, message}) {
+  messages.innerHTML += `<li>${name}: ${message}</li>` // display the message
   messages.scrollTop = messages.scrollHeight // scroll to the top
   messageInput.value = '' // clear the input field
 }
@@ -26,7 +28,7 @@ function init() {
   ws.onopen = () => console.log('!Connection opened!')
 
   // handle a message event
-  ws.onmessage = (e) => showMessage(e.data)
+  ws.onmessage = (e) => showMessage(JSON.parse(e.data))
 
   // Handle a close event
   ws.onclose = () => ws = null
@@ -40,9 +42,10 @@ sendBtn.onclick = function () {
     showMessage("No WebSocket connection :(");
     return;
   }
-
-  ws.send(messageInput.value);
-  showMessage(messageInput.value);
+  // Create an object:
+  const data = { message: messageInput.value, name: nameInput.value }
+  ws.send(JSON.stringify(data));
+  showMessage(data);
 }
 
 init();
